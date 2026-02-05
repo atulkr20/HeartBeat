@@ -65,8 +65,8 @@ async function start() {
   await mongoose.connect(mongoUrl);
   await loadAndScheduleAll();
 
-  app.listen(port, () => {
-    console.log(`Heartbeat running at http://localhost:${port}`);
+  app.listen(PORT, () => {
+    console.log(`Heartbeat running at http://localhost:${PORT}`);
   });
 }
 
