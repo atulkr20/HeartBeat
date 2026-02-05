@@ -5,7 +5,7 @@ function LandingPage({ onNavigate }) {
     <div className="landing-page">
       {/* Navbar */}
       <nav className="landing-navbar">
-        <div className="logo">Heartbeat</div>
+        <div className="logo">HeartBeat</div>
         <button className="nav-btn" onClick={() => onNavigate('dashboard')}>
           Open Dashboard
         </button>

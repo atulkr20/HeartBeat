@@ -76,7 +76,7 @@ function Dashboard() {
     <div className="dashboard">
       {/* Header */}
       <header className="dashboard-header">
-        <h1 className="dashboard-title">Heartbeat</h1>
+        <h1 className="dashboard-title">HeartBeat</h1>
         <button className="add-btn" onClick={() => setShowAddModal(true)}>
           Add Service
         </button>
