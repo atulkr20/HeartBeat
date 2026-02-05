@@ -18,7 +18,11 @@ const app = express();
 app.use(express.json());
 
 const mongoUrl = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/heartbeat";
-const port = Number(process.env.PORT || 3000);
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
+});
 
 app.use(servicesRouter);
 
