@@ -26,7 +26,7 @@ function Dashboard() {
 
   const fetchServices = async () => {
     try {
-      const res = await fetch(`${API_BASE}/dashboard`)
+      const res = await fetch(`${API_BASE}/api/dashboard`)
       const data = await res.json()
       // Transform dashboard data to service format
       const transformed = data.map(item => ({
@@ -55,7 +55,7 @@ function Dashboard() {
   const handleDelete = async () => {
     if (!deleteService) return
     try {
-      await fetch(`${API_BASE}/services/${deleteService._id}`, { method: 'DELETE' })
+      await fetch(`${API_BASE}/api/services/${deleteService._id}`, { method: 'DELETE' })
       setServices(services.filter(s => s._id !== deleteService._id))
       setDeleteService(null)
     } catch (error) {
@@ -169,7 +169,7 @@ function LogsModal({ service, onClose }) {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const res = await fetch(`${API_BASE}/services/${service._id}/logs?limit=10`)
+        const res = await fetch(`${API_BASE}/api/services/${service._id}/logs?limit=10`)
         const data = await res.json()
         setLogs(data.logs || [])
         setLoading(false)
