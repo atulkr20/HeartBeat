@@ -56,16 +56,12 @@ app.get("/api/dashboard", async (req, res) => {
   }
 });
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
-});
-
 async function start() {
   await mongoose.connect(mongoUrl);
   await loadAndScheduleAll();
 
   app.listen(PORT, () => {
-    console.log(`Heartbeat running at http://localhost:${PORT}`);
+    console.log(`Heartbeat API running on ${PORT}`);
   });
 }
 
