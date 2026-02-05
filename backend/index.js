@@ -18,7 +18,7 @@ const app = express();
 app.use(express.json());
 
 const mongoUrl = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/heartbeat";
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
