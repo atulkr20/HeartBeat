@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './AddServiceModal.css'
 
-const API_BASE = '/api'
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 function AddServiceModal({ onClose, onSuccess }) {
   const [name, setName] = useState('')
