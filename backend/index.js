@@ -20,7 +20,8 @@ app.use(express.json());
 const mongoUrl = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/heartbeat";
 const PORT = process.env.PORT || 10000;
 
-app.use(servicesRouter);
+// API routes
+app.use('/api', servicesRouter);
 
 app.get("/api/dashboard", async (req, res) => {
   try {
@@ -54,7 +55,7 @@ app.get("/api/dashboard", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
 });
 
 async function start() {

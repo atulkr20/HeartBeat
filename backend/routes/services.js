@@ -5,7 +5,7 @@ import { rescheduleService, removeServiceSchedule } from "../cron/scheduler.js";
 
 const router = express.Router();
 
-router.post("/api/services", async (req, res) => {
+router.post("/services", async (req, res) => {
   try {
     const { name, url, interval } = req.body || {};
 
@@ -21,7 +21,7 @@ router.post("/api/services", async (req, res) => {
   }
 });
 
-router.get("/api/services", async (req, res) => {
+router.get("/services", async (req, res) => {
   try {
     const services = await Service.find().sort({ createdAt: -1 });
     return res.json(services);
@@ -30,7 +30,7 @@ router.get("/api/services", async (req, res) => {
   }
 });
 
-router.put("/api/services/:id", async (req, res) => {
+router.put("/services/:id", async (req, res) => {
   try {
     const { name, url, interval } = req.body || {};
     if (!name && !url && !interval) {
@@ -58,7 +58,7 @@ router.put("/api/services/:id", async (req, res) => {
   }
 });
 
-router.delete("/api/services/:id", async (req, res) => {
+router.delete("/services/:id", async (req, res) => {
   try {
     const service = await Service.findByIdAndDelete(req.params.id);
     if (!service) {
@@ -74,7 +74,7 @@ router.delete("/api/services/:id", async (req, res) => {
   }
 });
 
-router.get("/api/services/:id/logs", async (req, res) => {
+router.get("/services/:id/logs", async (req, res) => {
   try {
     const serviceId = req.params.id;
     const page = Math.max(1, Number.parseInt(req.query.page || "1", 10));

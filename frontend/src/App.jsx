@@ -4,7 +4,7 @@ import AddServiceModal from './components/AddServiceModal'
 import DeleteModal from './components/DeleteModal'
 import './App.css'
 
-const API_BASE = '/api'
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 function formatTimeAgo(dateString) {
   if (!dateString) return 'Never'
