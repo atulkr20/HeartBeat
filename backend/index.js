@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -15,6 +16,7 @@ import { CheckLog } from "./models/CheckLog.js";
 import { Service } from "./models/Service.js";
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const mongoUrl = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/heartbeat";
