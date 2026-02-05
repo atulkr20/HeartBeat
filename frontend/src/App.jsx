@@ -1,154 +1,48 @@
 import { useState, useEffect } from 'react'
-import AddServiceForm from './components/AddServiceForm'
-import ServiceCard from './components/ServiceCard'
+import LandingPage from './components/LandingPage'
+import AddServiceModal from './components/AddServiceModal'
+import DeleteModal from './components/DeleteModal'
 import './App.css'
 
 const API_BASE = '/api'
 
-// Landing Page Component
-function LandingPage({ onNavigate }) {
-  return (
-    <div className="landing">
-      {/* Navbar */}
-      <nav className="navbar">
-        <div className="logo">HeartBeat</div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="hero">
-        <h1 className="hero-title">
-          Monitor your services <br />
-          <span className="highlight">in real time.</span>
-        </h1>
-        <p className="hero-subtitle">
-          HeartBeat continuously checks your APIs and shows live health status
-          with response times.
-        </p>
-        <div className="hero-buttons">
-          <button className="btn-primary large" onClick={() => onNavigate('dashboard')}>
-            Launch Dashboard
-          </button>
-        </div>
-      </section>
-
-      {/* Feature Cards */}
-      <section className="features">
-        <div className="feature-card">
-          <div className="feature-icon">⚡</div>
-          <h3>Real-time monitoring</h3>
-          <p>Get instant alerts when your services go down. Stay informed 24/7.</p>
-        </div>
-        <div className="feature-card">
-          <div className="feature-icon">📊</div>
-          <h3>Live dashboard</h3>
-          <p>Beautiful overview of all your services with status indicators and metrics.</p>
-        </div>
-        <div className="feature-card">
-          <div className="feature-icon">🧠</div>
-          <h3>Failure logs</h3>
-          <p>Detailed logs of every check failure to help you debug issues fast.</p>
-        </div>
-      </section>
-
-      {/* Product Preview */}
-      <section className="preview">
-        <div className="preview-container">
-          <div className="preview-header">
-            <div className="preview-dots">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <div className="preview-title">Dashboard</div>
-          </div>
-          <div className="preview-content">
-            <div className="preview-card">
-              <div className="card-row">
-                <span className="service-name">API Gateway</span>
-                <span className="status-badge up">
-                  <span className="dot"></span>UP
-                </span>
-              </div>
-              <div className="card-row">
-                <span className="service-url">https://api.example.com/health</span>
-                <span className="response-pill">124ms</span>
-              </div>
-            </div>
-            <div className="preview-card">
-              <div className="card-row">
-                <span className="service-name">Database</span>
-                <span className="status-badge up">
-                  <span className="dot"></span>UP
-                </span>
-              </div>
-              <div className="card-row">
-                <span className="service-url">https://db.example.com/status</span>
-                <span className="response-pill">45ms</span>
-              </div>
-            </div>
-            <div className="preview-card error">
-              <div className="card-row">
-                <span className="service-name">Payment Service</span>
-                <span className="status-badge down">
-                  <span className="dot"></span>DOWN
-                </span>
-              </div>
-              <div className="card-row">
-                <span className="service-url">https://pay.example.com/ping</span>
-                <span className="response-pill error">Timeout</span>
-              </div>
-            </div>
-            <div className="preview-card">
-              <div className="card-row">
-                <span className="service-name">Auth Service</span>
-                <span className="status-badge up">
-                  <span className="dot"></span>UP
-                </span>
-              </div>
-              <div className="card-row">
-                <span className="service-url">https://auth.example.com/health</span>
-                <span className="response-pill">89ms</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="footer">
-        <p>Built by Atul — HeartBeat v1</p>
-      </footer>
-    </div>
-  )
+function formatTimeAgo(dateString) {
+  if (!dateString) return 'Never'
+  const date = new Date(dateString)
+  const now = new Date()
+  const seconds = Math.floor((now - date) / 1000)
+  if (seconds < 60) return `${seconds}s ago`
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
+  return `${Math.floor(seconds / 86400)}d ago`
 }
 
-// Dashboard Component
-function Dashboard({ onNavigate }) {
+function Dashboard() {
   const [services, setServices] = useState([])
-  const [selectedService, setSelectedService] = useState(null)
-  const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [showLogsModal, setShowLogsModal] = useState(null)
+  const [deleteService, setDeleteService] = useState(null)
 
   const fetchServices = async () => {
     try {
       const res = await fetch(`${API_BASE}/dashboard`)
       const data = await res.json()
-      setServices(data)
+      // Transform dashboard data to service format
+      const transformed = data.map(item => ({
+        _id: item.service._id,
+        name: item.service.name,
+        url: item.service.url,
+        interval: item.service.interval,
+        status: item.last?.status || 'UNKNOWN',
+        responseTime: item.last?.responseTime || 0,
+        lastChecked: item.last?.checkedAt
+      }))
+      setServices(transformed)
       setLoading(false)
     } catch (error) {
       console.error('Failed to fetch services:', error)
       setLoading(false)
-    }
-  }
-
-  const fetchLogs = async (serviceId) => {
-    try {
-      const res = await fetch(`${API_BASE}/services/${serviceId}/logs?limit=10`)
-      const data = await res.json()
-      setLogs(data.logs || [])
-    } catch (error) {
-      console.error('Failed to fetch logs:', error)
-      setLogs([])
     }
   }
 
@@ -158,84 +52,165 @@ function Dashboard({ onNavigate }) {
     return () => clearInterval(interval)
   }, [])
 
-  const handleServiceClick = (service) => {
-    setSelectedService(service)
-    fetchLogs(service._id)
+  const handleDelete = async () => {
+    if (!deleteService) return
+    try {
+      await fetch(`${API_BASE}/services/${deleteService._id}`, { method: 'DELETE' })
+      setServices(services.filter(s => s._id !== deleteService._id))
+      setDeleteService(null)
+    } catch (error) {
+      console.error('Failed to delete service:', error)
+    }
   }
 
-  const handleCloseLogs = () => {
-    setSelectedService(null)
-    setLogs([])
+  const handleServiceClick = (service) => {
+    setShowLogsModal(service)
   }
 
   const handleServiceAdded = () => {
     fetchServices()
+    setShowAddModal(false)
   }
 
   return (
     <div className="dashboard">
-      {/* Dashboard Header */}
+      {/* Header */}
       <header className="dashboard-header">
-        <button className="back-btn" onClick={() => onNavigate('landing')}>
-          ← Back
+        <h1 className="dashboard-title">Heartbeat</h1>
+        <button className="add-btn" onClick={() => setShowAddModal(true)}>
+          Add Service
         </button>
-        <div className="logo">HeartBeat</div>
-        <div className="header-spacer"></div>
       </header>
 
-      <div className="dashboard-content">
-        <AddServiceForm onServiceAdded={handleServiceAdded} />
-
-        {loading ? (
-          <div className="loading">Loading services...</div>
-        ) : services.length === 0 ? (
-          <div className="empty-state">
-            <p>No services monitored yet.</p>
-            <p>Add a service above to get started.</p>
-          </div>
-        ) : (
-          <div className="services-grid">
-            {services.map((item) => (
-              <ServiceCard
-                key={item.service._id}
-                service={item.service}
-                last={item.last}
-                onClick={() => handleServiceClick(item.service)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {selectedService && (
-        <div className="modal-overlay" onClick={handleCloseLogs}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>{selectedService.name}</h2>
-              <button className="close-btn" onClick={handleCloseLogs}>×</button>
-            </div>
-            <div className="modal-url">{selectedService.url}</div>
-            <h3>Recent Checks</h3>
-            <div className="logs-list">
-              {logs.length === 0 ? (
-                <p className="no-logs">No logs available</p>
-              ) : (
-                logs.map((log, index) => (
-                  <div key={index} className="log-item">
-                    <span className={`log-status ${log.status}`}>
-                      {log.status}
-                    </span>
-                    <span className="log-time">{log.responseTime}ms</span>
-                    <span className="log-date">
-                      {new Date(log.checkedAt).toLocaleString()}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+      {/* Services List */}
+      {loading ? (
+        <div className="loading">
+          <div className="spinner"></div>
+          <p>Loading services...</p>
+        </div>
+      ) : services.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">📊</div>
+          <h3>No services yet</h3>
+          <p>Add your first service to start monitoring</p>
+          <button className="add-btn" onClick={() => setShowAddModal(true)}>
+            Add Service
+          </button>
+        </div>
+      ) : (
+        <div className="services-list">
+          {services.map((service) => (
+            <ServiceRow
+              key={service._id}
+              service={service}
+              onClick={() => handleServiceClick(service)}
+              onDelete={() => setDeleteService(service)}
+            />
+          ))}
         </div>
       )}
+
+      {/* Add Service Modal */}
+      {showAddModal && (
+        <AddServiceModal
+          onClose={() => setShowAddModal(false)}
+          onSuccess={handleServiceAdded}
+        />
+      )}
+
+      {/* Logs Modal */}
+      {showLogsModal && (
+        <LogsModal
+          service={showLogsModal}
+          onClose={() => setShowLogsModal(null)}
+        />
+      )}
+
+      {/* Delete Modal */}
+      {deleteService && (
+        <DeleteModal
+          service={deleteService}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteService(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+function ServiceRow({ service, onClick, onDelete }) {
+  const status = service.status || 'UNKNOWN'
+  const lastChecked = service.lastChecked
+
+  return (
+    <div className="service-row" onClick={onClick}>
+      <div className="service-info">
+        <div className="service-name">{service.name}</div>
+        <div className="service-url">{service.url}</div>
+      </div>
+      <div className="service-meta">
+        <span className={`service-status ${status.toLowerCase()}`}>
+          <span className="status-dot"></span>
+          {status}
+        </span>
+        <span className="service-time">{formatTimeAgo(lastChecked)}</span>
+        <button className="delete-btn" onClick={(e) => { e.stopPropagation(); onDelete(); }} title="Delete">
+          ×
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function LogsModal({ service, onClose }) {
+  const [logs, setLogs] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/services/${service._id}/logs?limit=10`)
+        const data = await res.json()
+        setLogs(data.logs || [])
+        setLoading(false)
+      } catch (error) {
+        console.error('Failed to fetch logs:', error)
+        setLoading(false)
+      }
+    }
+    fetchLogs()
+  }, [service._id])
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal logs-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="logs-header">
+          <h3>{service.name}</h3>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+        <div className="logs-url">{service.url}</div>
+        <div className="logs-list">
+          {loading ? (
+            <div className="loading">
+              <div className="spinner"></div>
+            </div>
+          ) : logs.length === 0 ? (
+            <div className="no-logs">No logs available</div>
+          ) : (
+            logs.map((log, index) => (
+              <div key={index} className="log-item">
+                <span className={`log-status ${log.status?.toLowerCase()}`}>
+                  {log.status || 'UNKNOWN'}
+                </span>
+                <span className="log-time">{log.responseTime}ms</span>
+                <span className="log-date">
+                  {new Date(log.checkedAt).toLocaleString()}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   )
 }
