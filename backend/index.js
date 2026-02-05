@@ -36,7 +36,12 @@ app.get("/api/dashboard", async (req, res) => {
         .limit(5)
         .lean();
       results.push({
-        service,
+        service: {
+          _id: service._id.toString(),
+          name: service.name,
+          url: service.url,
+          interval: service.interval,
+        },
         last,
         recent,
       });

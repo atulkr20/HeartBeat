@@ -1,0 +1,107 @@
+.service-card {
+  background: #27273d;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 4px solid transparent;
+}
+
+.service-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.service-card.up {
+  border-left-color: #48bb78;
+}
+
+.service-card.down {
+  border-left-color: #f56565;
+}
+
+.service-card.unknown {
+  border-left-color: #71717a;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.service-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e4e4e7;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.up {
+  background: #166534;
+  color: #86efac;
+}
+
+.status-badge.down {
+  background: #991b1b;
+  color: #fca5a5;
+}
+
+.status-badge.unknown {
+  background: #3f3f55;
+  color: #a1a1aa;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.service-url {
+  font-size: 0.85rem;
+  color: #71717a;
+  font-family: monospace;
+  margin-bottom: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-footer {
+  display: flex;
+  gap: 24px;
+  padding-top: 12px;
+  border-top: 1px solid #3f3f55;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: #71717a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #a1a1aa;
+}
